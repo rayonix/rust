@@ -2928,10 +2928,6 @@ impl<'a> Resolver<'a> {
                                     import_span: Span,
                                     name: Name,
                                     namespace: Namespace) {
-        if self.session.features.borrow().import_shadowing {
-            return
-        }
-
         match *target {
             Some(ref target) if !target.shadowable => {
                 let msg = format!("a {} named `{}` has already been imported \
@@ -2967,10 +2963,6 @@ impl<'a> Resolver<'a> {
                                                      &ImportResolution,
                                                      import_span: Span,
                                                      name: Name) {
-        if self.session.features.borrow().import_shadowing {
-            return
-        }
-
         // First, check for conflicts between imports and `extern crate`s.
         if module.external_module_children
                  .borrow()
@@ -3064,10 +3056,6 @@ impl<'a> Resolver<'a> {
                                                    module: &Module,
                                                    name: Name,
                                                    span: Span) {
-        if self.session.features.borrow().import_shadowing {
-            return
-        }
-
         if module.external_module_children.borrow().contains_key(&name) {
             self.session
                 .span_err(span,
@@ -3082,10 +3070,6 @@ impl<'a> Resolver<'a> {
                                                              module: &Module,
                                                              name: Name,
                                                              span: Span) {
-        if self.session.features.borrow().import_shadowing {
-            return
-        }
-
         if module.external_module_children.borrow().contains_key(&name) {
             self.session
                 .span_err(span,
