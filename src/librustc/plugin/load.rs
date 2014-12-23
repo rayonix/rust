@@ -19,6 +19,7 @@ use std::os;
 use std::dynamic_lib::DynamicLibrary;
 use syntax::ast;
 use syntax::attr;
+use syntax::codemap::Span;
 use syntax::visit;
 use syntax::visit::Visitor;
 use syntax::ext::expand::ExportedMacros;
@@ -88,12 +89,12 @@ pub fn load_plugins(sess: &Session, krate: &ast::Crate,
 
 // note that macros aren't expanded yet, and therefore macros can't add plugins.
 impl<'a, 'v> Visitor<'v> for PluginLoader<'a> {
-    fn visit_view_item(&mut self, vi: &ast::ViewItem) {
-        match vi.node {
-            ast::ViewItemExternCrate(name, _, _) => {
+    fn visit_item(&mut self, item: &ast::Item) {
+        match item.node {
+            ast::ItemExternCrate(_) => {
                 let mut plugin_phase = false;
 
-                for attr in vi.attrs.iter().filter(|a| a.check_name("phase")) {
+                for attr in item.attrs.iter().filter(|a| a.check_name("phase")) {
                     let phases = attr.meta_item_list().unwrap_or(&[]);
                     if attr::contains_name(phases, "plugin") {
                         plugin_phase = true;
@@ -108,20 +109,20 @@ impl<'a, 'v> Visitor<'v> for PluginLoader<'a> {
                 if !plugin_phase { return; }
 
                 let PluginMetadata { macros, lib, registrar_symbol } =
-                    self.reader.read_plugin_metadata(vi);
+                    self.reader.read_plugin_metadata(item);
 
                 self.plugins.macros.push(ExportedMacros {
-                    crate_name: name,
+                    crate_name: item.ident,
                     macros: macros,
                 });
 
                 match (lib, registrar_symbol) {
                     (Some(lib), Some(symbol))
-                        => self.dylink_registrar(vi, lib, symbol),
+                        => self.dylink_registrar(item.span, lib, symbol),
                     _ => (),
                 }
             }
-            _ => (),
+            _ => visit::walk_item(self, item)
         }
     }
     fn visit_mac(&mut self, _: &ast::Mac) {
@@ -132,7 +133,7 @@ impl<'a, 'v> Visitor<'v> for PluginLoader<'a> {
 
 impl<'a> PluginLoader<'a> {
     // Dynamically link a registrar function into the compiler process.
-    fn dylink_registrar(&mut self, vi: &ast::ViewItem, path: Path, symbol: String) {
+    fn dylink_registrar(&mut self, span: Span, path: Path, symbol: String) {
         // Make sure the path contains a / or the linker will search for it.
         let path = os::make_absolute(&path).unwrap();
 
@@ -141,7 +142,7 @@ impl<'a> PluginLoader<'a> {
             // this is fatal: there are almost certainly macros we need
             // inside this crate, so continue would spew "macro undefined"
             // errors
-            Err(err) => self.sess.span_fatal(vi.span, err[])
+            Err(err) => self.sess.span_fatal(span, err[])
         };
 
         unsafe {
@@ -151,7 +152,7 @@ impl<'a> PluginLoader<'a> {
                         mem::transmute::<*mut u8,PluginRegistrarFun>(registrar)
                     }
                     // again fatal if we can't register macros
-                    Err(err) => self.sess.span_fatal(vi.span, err[])
+                    Err(err) => self.sess.span_fatal(span, err[])
                 };
 
             self.plugins.registrars.push(registrar);

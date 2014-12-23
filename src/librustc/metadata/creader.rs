@@ -59,10 +59,6 @@ pub fn read_crates(sess: &Session,
 }
 
 impl<'a, 'v> visit::Visitor<'v> for Env<'a> {
-    fn visit_view_item(&mut self, a: &ast::ViewItem) {
-        visit_view_item(self, a);
-        visit::walk_view_item(self, a);
-    }
     fn visit_item(&mut self, a: &ast::Item) {
         visit_item(self, a);
         visit::walk_item(self, a);
@@ -113,32 +109,13 @@ fn visit_crate(e: &Env, c: &ast::Crate) {
     }
 }
 
-fn should_link(i: &ast::ViewItem) -> bool {
+fn should_link(i: &ast::Item) -> bool {
     i.attrs.iter().all(|attr| {
         attr.name().get() != "phase" ||
             attr.meta_item_list().map_or(false, |phases| {
                 attr::contains_name(phases[], "link")
             })
     })
-}
-
-fn visit_view_item(e: &mut Env, i: &ast::ViewItem) {
-    if !should_link(i) {
-        return;
-    }
-
-    match extract_crate_info(e, i) {
-        Some(info) => {
-            let (cnum, _, _) = resolve_crate(e,
-                                             &None,
-                                             info.ident[],
-                                             info.name[],
-                                             None,
-                                             i.span);
-            e.sess.cstore.add_extern_mod_stmt_cnum(info.id, cnum);
-        }
-        None => ()
-    }
 }
 
 struct CrateInfo {
@@ -148,10 +125,10 @@ struct CrateInfo {
     should_link: bool,
 }
 
-fn extract_crate_info(e: &Env, i: &ast::ViewItem) -> Option<CrateInfo> {
+fn extract_crate_info(e: &Env, i: &ast::Item) -> Option<CrateInfo> {
     match i.node {
-        ast::ViewItemExternCrate(ident, ref path_opt, id) => {
-            let ident = token::get_ident(ident);
+        ast::ItemExternCrate(ref path_opt) => {
+            let ident = token::get_ident(i.ident);
             debug!("resolving extern crate stmt. ident: {} path_opt: {}",
                    ident, path_opt);
             let name = match *path_opt {
@@ -166,7 +143,7 @@ fn extract_crate_info(e: &Env, i: &ast::ViewItem) -> Option<CrateInfo> {
             Some(CrateInfo {
                 ident: ident.get().to_string(),
                 name: name,
-                id: id,
+                id: i.id,
                 should_link: should_link(i),
             })
         }
@@ -196,8 +173,22 @@ pub fn validate_crate_name(sess: Option<&Session>, s: &str, sp: Option<Span>) {
     }
 }
 
-fn visit_item(e: &Env, i: &ast::Item) {
+fn visit_item(e: &mut Env, i: &ast::Item) {
     match i.node {
+        ast::ItemExternCrate(_) => {
+            if !should_link(i) {
+                return;
+            }
+
+            let info = extract_crate_info(e, i).unwrap();
+            let (cnum, _, _) = resolve_crate(e,
+                                             &None,
+                                             info.ident[],
+                                             info.name[],
+                                             None,
+                                             i.span);
+            e.sess.cstore.add_extern_mod_stmt_cnum(info.id, cnum);
+        }
         ast::ItemForeignMod(ref fm) => {
             if fm.abi == abi::Rust || fm.abi == abi::RustIntrinsic {
                 return;
@@ -453,7 +444,7 @@ impl<'a> PluginMetadataReader<'a> {
         }
     }
 
-    pub fn read_plugin_metadata(&mut self, krate: &ast::ViewItem) -> PluginMetadata {
+    pub fn read_plugin_metadata(&mut self, krate: &ast::Item) -> PluginMetadata {
         let info = extract_crate_info(&self.env, krate).unwrap();
         let target_triple = self.env.sess.opts.target_triple[];
         let is_cross = target_triple != config::host_triple();

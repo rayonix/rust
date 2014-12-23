@@ -1449,8 +1449,8 @@ fn encode_info_for_item(ecx: &EncodeContext,
         // Encode inherent implementations for this trait.
         encode_inherent_implementations(ecx, rbml_w, def_id);
       }
-      ast::ItemMac(..) => {
-        // macros are encoded separately
+      ast::ItemExternCrate(_) | ast::ItemUse(_) |ast::ItemMac(..) => {
+        // these are encoded separately
       }
     }
 }
