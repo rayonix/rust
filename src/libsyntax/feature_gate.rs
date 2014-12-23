@@ -148,28 +148,6 @@ impl<'a, 'v> Visitor<'v> for Context<'a> {
         }
     }
 
-    fn visit_view_item(&mut self, i: &ast::ViewItem) {
-        match i.node {
-            ast::ViewItemUse(ref path) => {
-                if let ast::ViewPathGlob(..) = path.node {
-                    self.gate_feature("globs", path.span,
-                                      "glob import statements are \
-                                       experimental and possibly buggy");
-                }
-            }
-            ast::ViewItemExternCrate(..) => {
-                for attr in i.attrs.iter() {
-                    if attr.name().get() == "phase"{
-                        self.gate_feature("phase", attr.span,
-                                          "compile time crate loading is \
-                                           experimental and possibly buggy");
-                    }
-                }
-            }
-        }
-        visit::walk_view_item(self, i)
-    }
-
     fn visit_item(&mut self, i: &ast::Item) {
         for attr in i.attrs.iter() {
             if attr.name() == "thread_local" {
@@ -184,6 +162,22 @@ impl<'a, 'v> Visitor<'v> for Context<'a> {
             }
         }
         match i.node {
+            ast::ItemUse(ref path) => {
+                if let ast::ViewPathGlob(_) = path.node {
+                    self.gate_feature("globs", path.span,
+                                      "glob import statements are \
+                                       experimental and possibly buggy");
+                }
+            }
+
+            ast::ItemExternCrate(_) => {
+                if attr::contains_name(i.attrs[], "phase") {
+                    self.gate_feature("phase", i.span,
+                                      "compile time crate loading is \
+                                       experimental and possibly buggy");
+                }
+            }
+
             ast::ItemForeignMod(ref foreign_module) => {
                 if attr::contains_name(i.attrs[], "link_args") {
                     self.gate_feature("link_args", i.span,

@@ -883,7 +883,6 @@ pub fn map_crate<'ast, F: FoldOps>(forest: &'ast mut Forest, fold_ops: F) -> Map
     let krate = mem::replace(&mut forest.krate, Crate {
         module: Mod {
             inner: DUMMY_SP,
-            view_items: vec![],
             items: vec![],
         },
         attrs: vec![],
@@ -1043,6 +1042,8 @@ fn node_id_to_string(map: &Map, id: NodeId, include_id: bool) -> String {
         Some(NodeItem(item)) => {
             let path_str = map.path_to_str_with_ident(id, item.ident);
             let item_str = match item.node {
+                ItemExternCrate(..) => "extern crate",
+                ItemUse(..) => "use",
                 ItemStatic(..) => "static",
                 ItemConst(..) => "const",
                 ItemFn(..) => "fn",
