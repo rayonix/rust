@@ -1037,6 +1037,7 @@ pub fn convert(ccx: &CrateCtxt, it: &ast::Item) {
     debug!("convert: item {} with id {}", token::get_ident(it.ident), it.id);
     match it.node {
         // These don't define types.
+        ast::ItemExternCrate(_) | ast::ItemUse(_) |
         ast::ItemForeignMod(_) | ast::ItemMod(_) | ast::ItemMac(_) => {}
         ast::ItemEnum(ref enum_definition, ref generics) => {
             let pty = ty_of_item(ccx, it);
@@ -1529,6 +1530,7 @@ pub fn ty_of_item<'a, 'tcx>(ccx: &CrateCtxt<'a, 'tcx>, it: &ast::Item)
             tcx.tcache.borrow_mut().insert(local_def(it.id), pty.clone());
             return pty;
         }
+        ast::ItemExternCrate(_) | ast::ItemUse(_) |
         ast::ItemImpl(..) | ast::ItemMod(_) |
         ast::ItemForeignMod(_) | ast::ItemMac(_) => panic!(),
     }
