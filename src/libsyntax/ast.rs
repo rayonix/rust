@@ -53,7 +53,6 @@ pub use self::UnboxedClosureKind::*;
 pub use self::UnOp::*;
 pub use self::UnsafeSource::*;
 pub use self::VariantKind::*;
-pub use self::ViewItem_::*;
 pub use self::ViewPath_::*;
 pub use self::Visibility::*;
 pub use self::PathParameters::*;
@@ -492,7 +491,6 @@ impl PartialEq for MetaItem_ {
 
 #[deriving(Clone, PartialEq, Eq, RustcEncodable, RustcDecodable, Hash, Show)]
 pub struct Block {
-    pub view_items: Vec<ViewItem>,
     pub stmts: Vec<P<Stmt>>,
     pub expr: Option<P<Expr>>,
     pub id: NodeId,
@@ -1355,14 +1353,12 @@ pub struct Mod {
     /// For `mod foo;`, the inner span ranges from the first token
     /// to the last token in the external file.
     pub inner: Span,
-    pub view_items: Vec<ViewItem>,
     pub items: Vec<P<Item>>,
 }
 
 #[deriving(Clone, PartialEq, Eq, RustcEncodable, RustcDecodable, Hash, Show)]
 pub struct ForeignMod {
     pub abi: Abi,
-    pub view_items: Vec<ViewItem>,
     pub items: Vec<P<ForeignItem>>,
 }
 
@@ -1421,31 +1417,13 @@ pub enum ViewPath_ {
     /// or just
     ///
     /// `foo::bar::baz` (with `as baz` implicitly on the right)
-    ViewPathSimple(Ident, Path, NodeId),
+    ViewPathSimple(Ident, Path),
 
     /// `foo::bar::*`
-    ViewPathGlob(Path, NodeId),
+    ViewPathGlob(Path),
 
     /// `foo::bar::{a,b,c}`
-    ViewPathList(Path, Vec<PathListItem> , NodeId)
-}
-
-#[deriving(Clone, PartialEq, Eq, RustcEncodable, RustcDecodable, Hash, Show)]
-pub struct ViewItem {
-    pub node: ViewItem_,
-    pub attrs: Vec<Attribute>,
-    pub vis: Visibility,
-    pub span: Span,
-}
-
-#[deriving(Clone, PartialEq, Eq, RustcEncodable, RustcDecodable, Hash, Show)]
-pub enum ViewItem_ {
-    /// Ident: name used to refer to this crate in the code
-    /// optional (InternedString,StrStyle): if present, this is a location
-    /// (containing arbitrary characters) from which to fetch the crate sources
-    /// For example, extern crate whatever = "github.com/rust-lang/rust"
-    ViewItemExternCrate(Ident, Option<(InternedString,StrStyle)>, NodeId),
-    ViewItemUse(P<ViewPath>),
+    ViewPathList(Path, Vec<PathListItem>)
 }
 
 /// Meta-data associated with an item
@@ -1567,6 +1545,12 @@ pub struct Item {
 
 #[deriving(Clone, PartialEq, Eq, RustcEncodable, RustcDecodable, Hash, Show)]
 pub enum Item_ {
+    // Optional location (containing arbitrary characters) from which
+    // to fetch the crate sources.
+    // For example, extern crate whatever = "github.com/rust-lang/rust".
+    ItemExternCrate(Option<(InternedString, StrStyle)>),
+    ItemUse(P<ViewPath>),
+
     ItemStatic(P<Ty>, Mutability, P<Expr>),
     ItemConst(P<Ty>, P<Expr>),
     ItemFn(P<FnDecl>, Unsafety, Abi, Generics, P<Block>),
@@ -1594,6 +1578,8 @@ pub enum Item_ {
 impl Item_ {
     pub fn descriptive_variant(&self) -> &str {
         match *self {
+            ItemExternCrate(..) => "extern crate",
+            ItemUse(..) => "use",
             ItemStatic(..) => "static item",
             ItemConst(..) => "constant item",
             ItemFn(..) => "function",
@@ -1670,7 +1656,6 @@ mod test {
                     hi: BytePos(19),
                     expn_id: NO_EXPANSION,
                 },
-                view_items: Vec::new(),
                 items: Vec::new(),
             },
             attrs: Vec::new(),
