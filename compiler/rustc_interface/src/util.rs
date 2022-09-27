@@ -246,6 +246,8 @@ pub fn get_codegen_backend(
             filename if filename.contains('.') => load_backend_from_dylib(filename.as_ref()),
             #[cfg(feature = "llvm")]
             "llvm" => rustc_codegen_llvm::LlvmCodegenBackend::new,
+            #[cfg(feature = "mlir")]
+            "mlir" => rustc_codegen_mlir::MlirCodegenBackend::new,
             backend_name => get_codegen_sysroot(maybe_sysroot, backend_name),
         }
     });

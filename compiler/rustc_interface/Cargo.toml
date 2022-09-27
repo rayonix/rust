@@ -32,6 +32,7 @@ rustc_data_structures = { path = "../rustc_data_structures" }
 rustc_codegen_ssa = { path = "../rustc_codegen_ssa" }
 rustc_symbol_mangling = { path = "../rustc_symbol_mangling" }
 rustc_codegen_llvm = { path = "../rustc_codegen_llvm", optional = true }
+rustc_codegen_mlir = { path = "../rustc_codegen_mlir", optional = true }
 rustc_hir = { path = "../rustc_hir" }
 rustc_metadata = { path = "../rustc_metadata" }
 rustc_const_eval = { path = "../rustc_const_eval" }
@@ -53,4 +54,5 @@ rustc_ty_utils = { path = "../rustc_ty_utils" }
 
 [features]
 llvm = ['rustc_codegen_llvm']
+mlir = ['dep:rustc_codegen_mlir']
 rustc_use_parallel_compiler = ['rustc-rayon', 'rustc-rayon-core', 'rustc_query_impl/rustc_use_parallel_compiler', 'rustc_errors/rustc_use_parallel_compiler']

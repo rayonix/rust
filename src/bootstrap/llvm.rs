@@ -418,6 +418,10 @@ impl Step for Llvm {
             enabled_llvm_projects.push("clang");
         }
 
+        if builder.config.llvm_mlir {
+            enabled_llvm_projects.push("mlir");
+        }
+
         // We want libxml to be disabled.
         // See https://github.com/rust-lang/rust/pull/50104
         cfg.define("LLVM_ENABLE_LIBXML2", "OFF");
@@ -721,7 +725,7 @@ fn configure_cmake(
     // We also do this if the user explicitly requested static libstdc++.
     if builder.config.llvm_static_stdcpp {
         if !target.contains("msvc") && !target.contains("netbsd") && !target.contains("solaris") {
-            if target.contains("apple") || target.contains("windows") {
+            if target.contains("apple") || target.contains("windows") || builder.config.llvm_mlir {
                 ldflags.push_all("-static-libstdc++");
             } else {
                 ldflags.push_all("-Wl,-Bsymbolic -static-libstdc++");

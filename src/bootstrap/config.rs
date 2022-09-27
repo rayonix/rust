@@ -136,6 +136,7 @@ pub struct Config {
     pub llvm_polly: bool,
     pub llvm_clang: bool,
     pub llvm_enable_warnings: bool,
+    pub llvm_mlir: bool,
     pub llvm_from_ci: bool,
     pub llvm_build_config: HashMap<String, String>,
 
@@ -697,6 +698,7 @@ define_config! {
         polly: Option<bool> = "polly",
         clang: Option<bool> = "clang",
         enable_warnings: Option<bool> = "enable-warnings",
+        mlir: Option<bool> = "mlir",
         download_ci_llvm: Option<StringOrBool> = "download-ci-llvm",
         build_config: Option<HashMap<String, String>> = "build-config",
     }
@@ -1208,6 +1210,7 @@ impl Config {
             config.llvm_polly = llvm.polly.unwrap_or(false);
             config.llvm_clang = llvm.clang.unwrap_or(false);
             config.llvm_enable_warnings = llvm.enable_warnings.unwrap_or(false);
+            config.llvm_mlir = llvm.mlir.unwrap_or(false);
             config.llvm_build_config = llvm.build_config.clone().unwrap_or(Default::default());
 
             let asserts = llvm_assertions.unwrap_or(false);
@@ -1248,6 +1251,7 @@ impl Config {
                 check_ci_llvm!(llvm.allow_old_toolchain);
                 check_ci_llvm!(llvm.polly);
                 check_ci_llvm!(llvm.clang);
+                check_ci_llvm!(llvm.mlir);
                 check_ci_llvm!(llvm.build_config);
                 check_ci_llvm!(llvm.plugins);
             }
@@ -1612,6 +1616,10 @@ impl Config {
 
     pub fn llvm_enabled(&self) -> bool {
         self.rust_codegen_backends.contains(&INTERNER.intern_str("llvm"))
+    }
+
+    pub fn mlir_enabled(&self) -> bool {
+        self.rust_codegen_backends.contains(&INTERNER.intern_str("mlir"))
     }
 
     pub fn llvm_libunwind(&self, target: TargetSelection) -> LlvmLibunwind {

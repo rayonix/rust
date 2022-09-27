@@ -1039,7 +1039,11 @@ impl Step for CodegenBackend {
     const DEFAULT: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.paths(&["compiler/rustc_codegen_cranelift", "compiler/rustc_codegen_gcc"])
+        run.paths(&[
+            "compiler/rustc_codegen_cranelift",
+            "compiler/rustc_codegen_gcc",
+            "compiler/rustc_codegen_mlir",
+        ])
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1048,7 +1052,7 @@ impl Step for CodegenBackend {
         }
 
         for &backend in &run.builder.config.rust_codegen_backends {
-            if backend == "llvm" {
+            if backend == "llvm" || backend == "mlir" {
                 continue; // Already built as part of rustc
             }
 
@@ -1148,7 +1152,7 @@ fn copy_codegen_backends_to_sysroot(
     }
 
     for backend in builder.config.rust_codegen_backends.iter() {
-        if backend == "llvm" {
+        if backend == "llvm" || backend == "mlir" {
             continue; // Already built as part of rustc
         }
 
@@ -1421,7 +1425,7 @@ impl Step for Assemble {
         }
 
         for &backend in builder.config.rust_codegen_backends.iter() {
-            if backend == "llvm" {
+            if backend == "llvm" || backend == "mlir" {
                 continue; // Already built as part of rustc
             }
 
