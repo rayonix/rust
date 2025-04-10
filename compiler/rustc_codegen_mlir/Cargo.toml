@@ -1,0 +1,15 @@
+[package]
+name = "rustc_codegen_mlir"
+version = "0.1.0"
+authors = ["Steve Ray <rayonix@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[lib]
+crate-type = ["dylib"]
+
+[dependencies]
+melior = "0.22.0"
+
+[package.metadata.rust-analyzer]
+rustc_private = true
