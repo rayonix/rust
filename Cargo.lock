@@ -6530,3 +6530,8 @@ dependencies = [
  "quote",
  "syn 2.0.100",
 ]
+
+[[patch.unused]]
+name = "libffi-sys"
+version = "3.2.0"
+source = "git+https://github.com/tov/libffi-rs?branch=master#688466ba0b70c5be640ee3481811c59f81da46bb"

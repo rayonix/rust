@@ -3238,3 +3238,8 @@ dependencies = [
  "thiserror 2.0.12",
  "time",
 ]
+
+[[patch.unused]]
+name = "libffi-sys"
+version = "2.3.0"
+source = "git+https://github.com/tov/libffi-rs?branch=master#ed5f28d3d16e9a8177b7f79115f76f96ef150b09"
