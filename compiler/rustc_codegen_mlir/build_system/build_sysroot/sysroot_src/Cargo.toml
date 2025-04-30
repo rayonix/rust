@@ -1,0 +1,10 @@
+[package]
+name = "sysroot_src"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+name = "sysroot_src"
+path = "lib.rs"
+
+[dependencies]

@@ -1,0 +1,11 @@
+[package]
+name = "build_system"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+boml = "0.3.1"
+
+[[bin]]
+name = "build_system"
+path = "src/main.rs"

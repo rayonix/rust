@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 crate-type = ["dylib"]
 
 [dependencies]
-melior = "0.22.0"
+melior = "0.24.0"
 
 [package.metadata.rust-analyzer]
 rustc_private = true

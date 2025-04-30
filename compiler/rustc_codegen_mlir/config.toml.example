@@ -1,0 +1,6 @@
+# Sample configuration for rustc_codegen_mlir
+# Copy this file to "config.toml" and adjust the paths according to your system
+#
+# Path to the MLIR installation
+# You need to have MLIR (part of LLVM) installed to build the project
+mlir-path = "/path/to/your/mlir/installation"

@@ -1,0 +1,9 @@
+[package]
+name = "sysroot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sysroot_src = { path = "sysroot_src" }
+
+[workspace]
