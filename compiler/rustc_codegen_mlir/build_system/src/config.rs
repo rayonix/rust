@@ -6,9 +6,7 @@ use std::{env as std_env, fs};
 use boml::Toml;
 use boml::types::TomlValue;
 
-use crate::utils::{
-    get_os_name, get_sysroot_dir, rustc_version_info, split_args,
-};
+use crate::utils::{get_os_name, get_sysroot_dir, rustc_version_info, split_args};
 
 #[derive(Default, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Channel {
@@ -68,10 +66,7 @@ impl ConfigFile {
                 .display()
                 .to_string();
         } else {
-            return failed_config_parsing(
-                config_file,
-                "`mlir-path` value must be set",
-            );
+            return failed_config_parsing(config_file, "`mlir-path` value must be set");
         }
         Ok(config)
     }
@@ -159,7 +154,9 @@ impl ConfigInfo {
                     self.cg_mlir_path = Some(arg.into());
                 }
                 _ => {
-                    return Err("Expected a value after `--cg_mlir-path`, found nothing".to_string());
+                    return Err(
+                        "Expected a value after `--cg_mlir-path`, found nothing".to_string()
+                    );
                 }
             },
             "--use-backend" => match args.next() {
@@ -348,12 +345,7 @@ impl ConfigInfo {
         let path = std::env::var("PATH").unwrap_or_default();
         env.insert(
             "PATH".to_string(),
-            format!(
-                "{}/bin{}{}",
-                mlir_path,
-                if path.is_empty() { "" } else { ":" },
-                path
-            ),
+            format!("{}/bin{}{}", mlir_path, if path.is_empty() { "" } else { ":" }, path),
         );
 
         self.rustc_command = vec![rustc];

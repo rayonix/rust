@@ -93,10 +93,6 @@ impl CodegenBackend for MlirCodegenBackend {
 
     fn print(&self, _req: &PrintRequest, _out: &mut String, _sess: &Session) {}
 
-    fn target_features_cfg(&self, _sess: &Session) -> (Vec<Symbol>, Vec<Symbol>) {
-        (std::vec![], std::vec![])
-    }
-
     fn print_passes(&self) {}
 
     fn print_version(&self) {}

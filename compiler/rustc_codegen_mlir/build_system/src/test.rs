@@ -52,10 +52,7 @@ fn usage() {
 impl TestArg {
     /// Creates a new `TestArg` instance by parsing command-line arguments.
     fn new() -> Result<Option<Self>, String> {
-        let mut test_arg = Self {
-            flags: Vec::new(),
-            config_info: ConfigInfo::default(),
-        };
+        let mut test_arg = Self { flags: Vec::new(), config_info: ConfigInfo::default() };
         // Skip binary name and the `test` command.
         let mut args = std::env::args().skip(2);
 
@@ -65,8 +62,16 @@ impl TestArg {
                     usage();
                     return Ok(None);
                 }
-                "--nocapture" | "--bless" | "--skip-codegen" | "--skip-ui" | "--skip-standard-lib"
-                | "--exact" | "--quiet" | "--ignored" | "--include-ignored" | "--external" => {
+                "--nocapture"
+                | "--bless"
+                | "--skip-codegen"
+                | "--skip-ui"
+                | "--skip-standard-lib"
+                | "--exact"
+                | "--quiet"
+                | "--ignored"
+                | "--include-ignored"
+                | "--external" => {
                     test_arg.flags.push(arg);
                 }
                 "--filter" | "--test-threads" | "--suite" | "--run" => {

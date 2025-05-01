@@ -58,7 +58,10 @@ fn display_info(info_arg: &mut InfoArg) -> Result<(), String> {
     println!("Build type: {}", info_arg.config_info.channel.as_str());
     println!("Target: {}", info_arg.config_info.target_triple);
     println!("Host: {}", info_arg.config_info.host_triple);
-    println!("MLIR path: {}", info_arg.config_info.mlir_path.as_ref().unwrap_or(&"Not found".to_string()));
+    println!(
+        "MLIR path: {}",
+        info_arg.config_info.mlir_path.as_ref().unwrap_or(&"Not found".to_string())
+    );
     println!("cargo target dir: {}", info_arg.config_info.cargo_target_dir);
 
     // When called with `--env`.

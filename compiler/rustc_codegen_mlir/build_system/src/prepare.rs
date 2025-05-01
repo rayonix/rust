@@ -14,7 +14,7 @@ pub fn run() -> Result<(), String> {
     // For now, we don't need any specific preparation steps
     // for rustc_codegen_mlir. This can be extended later if
     // we need to download or set up dependencies.
-    
+
     Ok(())
 }
 
